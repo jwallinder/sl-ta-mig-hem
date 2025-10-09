@@ -68,7 +68,8 @@ GET /api/sl/trips?type_origin=coord&type_destination=any&name_origin=<LON>:<LAT>
 ```
 
 **CORS-lösning:**
-Appen använder en Vite-proxy för att undvika CORS-problem när API:et anropas från webbläsaren. Proxyn konfigureras i `vite.config.ts`.
+- **Development**: Appen använder en Vite-proxy för att undvika CORS-problem när API:et anropas från webbläsaren. Proxyn konfigureras i `vite.config.ts`.
+- **Production**: Appen använder SL API:et direkt eftersom Lovable hanterar CORS-problem automatiskt.
 
 ## Integritet
 
