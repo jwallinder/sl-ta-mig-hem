@@ -27,31 +27,7 @@ cd fruangen-direkt
 npm install
 ```
 
-### 3. Konfigurera API-nyckel
-
-Du behöver en API-nyckel från Trafiklab för att använda SL:s API:er.
-
-**Skapa Trafiklab-konto:**
-
-1. Gå till [https://www.trafiklab.se](https://www.trafiklab.se)
-2. Registrera ett konto
-3. Skapa ett nytt projekt
-4. Lägg till följande API:er till ditt projekt:
-   - **SL Reseplanerare 3.1** (Journey Planner)
-   - **SL Platsuppslag** (Stop Lookup / Typeahead)
-5. Kopiera din API-nyckel (samma nyckel används för båda API:erna)
-
-**Lägg till API-nyckeln:**
-
-Skapa en fil `.env` i projektets rotkatalog:
-
-```bash
-VITE_TRAFIKLAB_KEY=din_api_nyckel_här
-```
-
-**Viktigt:** Lägg ALDRIG till `.env` i git. Den är redan tillagd i `.gitignore`.
-
-### 4. Starta utvecklingsservern
+### 3. Starta utvecklingsservern
 
 ```bash
 npm run dev

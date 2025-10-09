@@ -13,19 +13,9 @@ const Index = () => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Kontrollera om API-nyckel finns
-  const hasApiKey = !!import.meta.env.VITE_TRAFIKLAB_KEY;
-
   const handleSearchTrips = async () => {
     setError(null);
     setTrips([]);
-
-    if (!hasApiKey) {
-      setError(
-        "API-nyckel saknas. Vänligen konfigurera VITE_TRAFIKLAB_KEY i din miljö. Se README för instruktioner."
-      );
-      return;
-    }
 
     // Kontrollera om geolocation finns
     if (!navigator.geolocation) {
@@ -102,18 +92,13 @@ const Index = () => {
       {/* Main Content */}
       <main className="flex-1 w-full px-4 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
-          {/* API Key Warning */}
-          {!hasApiKey && (
-            <ErrorMessage message="API-nyckel saknas. Konfigurera VITE_TRAFIKLAB_KEY för att använda appen. Se README för instruktioner." />
-          )}
-
           {/* Main Button */}
           <div className="flex justify-center">
             <Button
               size="lg"
               className="h-20 px-16 text-2xl font-bold shadow-button hover:shadow-lg transition-all"
               onClick={handleSearchTrips}
-              disabled={loading || !hasApiKey}
+              disabled={loading}
               aria-label="Sök resor till Fruängen"
             >
               <MapPin className="w-6 h-6 mr-2" />

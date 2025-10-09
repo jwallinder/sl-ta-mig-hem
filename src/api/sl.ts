@@ -63,12 +63,8 @@ export async function getFruangenSiteId(): Promise<string> {
     return fruangenSiteIdCache;
   }
 
-  if (!API_KEY) {
-    throw new Error("API-nyckel saknas. Kontrollera att VITE_TRAFIKLAB_KEY är konfigurerad.");
-  }
-
   const params = new URLSearchParams({
-    key: API_KEY,
+    key: API_KEY || "",
     searchstring: "Fruängen",
     stationsonly: "true",
     maxresults: "1",
@@ -98,12 +94,8 @@ export async function getTripsFromCoordsToDest(
   lon: number,
   destId: string
 ): Promise<Trip[]> {
-  if (!API_KEY) {
-    throw new Error("API-nyckel saknas. Kontrollera att VITE_TRAFIKLAB_KEY är konfigurerad.");
-  }
-
   const params = new URLSearchParams({
-    key: API_KEY,
+    key: API_KEY || "",
     originCoordLat: lat.toString(),
     originCoordLong: lon.toString(),
     destId: destId,
