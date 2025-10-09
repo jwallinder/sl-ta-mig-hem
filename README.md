@@ -1,73 +1,135 @@
-# Welcome to your Lovable project
+# Fruängen Direkt
 
-## Project info
+En minimalistisk mobilapp för att snabbt hitta bästa kollektivtrafikresan från din plats till Fruängen i Stockholm.
 
-**URL**: https://lovable.dev/projects/fa4e10e2-663a-4ba2-bf18-97c68ac55f41
+## Funktioner
 
-## How can I edit this code?
+- ✅ Ett klick för att söka resor till Fruängen
+- ✅ Automatisk geolokalisering
+- ✅ Realtidsdata från SL
+- ✅ Visa 3 bästa reseförslag
+- ✅ Detaljerad visning av varje resa med linjenummer och byten
+- ✅ Mobiloptimerad design
+- ✅ Ingen permanent lagring av positionsdata
 
-There are several ways of editing your application.
+## Installation
 
-**Use Lovable**
+### 1. Klona projektet
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/fa4e10e2-663a-4ba2-bf18-97c68ac55f41) and start prompting.
+```bash
+git clone <repository-url>
+cd fruangen-direkt
+```
 
-Changes made via Lovable will be committed automatically to this repo.
+### 2. Installera beroenden
 
-**Use your preferred IDE**
+```bash
+npm install
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 3. Konfigurera API-nyckel
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Du behöver en API-nyckel från Trafiklab för att använda SL:s API:er.
 
-Follow these steps:
+**Skapa Trafiklab-konto:**
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. Gå till [https://www.trafiklab.se](https://www.trafiklab.se)
+2. Registrera ett konto
+3. Skapa ett nytt projekt
+4. Lägg till följande API:er till ditt projekt:
+   - **SL Reseplanerare 3.1** (Journey Planner)
+   - **SL Platsuppslag** (Stop Lookup / Typeahead)
+5. Kopiera din API-nyckel (samma nyckel används för båda API:erna)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+**Lägg till API-nyckeln:**
 
-# Step 3: Install the necessary dependencies.
-npm i
+Skapa en fil `.env` i projektets rotkatalog:
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+VITE_TRAFIKLAB_KEY=din_api_nyckel_här
+```
+
+**Viktigt:** Lägg ALDRIG till `.env` i git. Den är redan tillagd i `.gitignore`.
+
+### 4. Starta utvecklingsservern
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Appen körs nu på `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Användning
 
-**Use GitHub Codespaces**
+1. Öppna appen i din mobila webbläsare eller desktop
+2. Klicka på den stora **FRUÄNGEN**-knappen
+3. Tillåt webbläsaren att använda din position
+4. Se de 3 bästa resealternativen till Fruängen!
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Teknisk stack
 
-## What technologies are used for this project?
+- **React** - UI-ramverk
+- **TypeScript** - Typsäkerhet
+- **Vite** - Build-verktyg
+- **Tailwind CSS** - Styling
+- **Shadcn/ui** - UI-komponenter
+- **SL API via Trafiklab** - Realtidsdata
 
-This project is built with:
+## API:er som används
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### SL Platsuppslag (Typeahead)
 
-## How can I deploy this project?
+Används för att hitta SiteId för Fruängen:
 
-Simply open [Lovable](https://lovable.dev/projects/fa4e10e2-663a-4ba2-bf18-97c68ac55f41) and click on Share -> Publish.
+```
+GET https://api.sl.se/api2/typeahead.json?key=<API_KEY>&searchstring=Fruängen&stationsonly=true&maxresults=1
+```
 
-## Can I connect a custom domain to my Lovable project?
+### SL Reseplanerare 3.1 (Trip)
 
-Yes, you can!
+Används för att hämta reseförslag:
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```
+GET https://api.sl.se/api2/TravelplannerV3_1/trip.json?key=<API_KEY>&originCoordLat=<LAT>&originCoordLong=<LON>&destId=<DEST_ID>&numTrips=3
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Integritet
+
+- Din position används endast för att söka resor
+- Vi sparar aldrig din position permanent
+- Positionsdata lagras endast tillfälligt i minnet under sökningen
+- När du stänger appen raderas all positionsdata automatiskt
+
+## CORS och Proxy (om nödvändigt)
+
+Om du får CORS-fel i utvecklingsläge kan du konfigurera en proxy i `vite.config.ts`:
+
+```typescript
+export default defineConfig({
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://api.sl.se',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  }
+})
+```
+
+## Bygg för produktion
+
+```bash
+npm run build
+```
+
+Byggd app hamnar i `dist/`-mappen.
+
+## Licens
+
+MIT
+
+## Support
+
+Vid frågor eller problem, öppna en issue på GitHub eller kontakta utvecklaren.
