@@ -1,10 +1,10 @@
-# Fruängen Direkt
+# Stockholm Direkt
 
-En minimalistisk mobilapp för att snabbt hitta bästa kollektivtrafikresan från din plats till Fruängen i Stockholm.
+En minimalistisk mobilapp för att snabbt hitta bästa kollektivtrafikresan från din plats till populära destinationer i Stockholm.
 
 ## Funktioner
 
-- ✅ Ett klick för att söka resor till Fruängen
+- ✅ Ett klick för att söka resor till Fruängen, T-Centralen eller XXL Kungens Kurva
 - ✅ Automatisk geolokalisering
 - ✅ Realtidsdata från SL
 - ✅ Visa 3 bästa reseförslag
@@ -38,9 +38,9 @@ Appen körs nu på `http://localhost:8080`
 ## Användning
 
 1. Öppna appen i din mobila webbläsare eller desktop
-2. Klicka på den stora **FRUÄNGEN**-knappen
+2. Välj destination: **FRUÄNGEN**, **T-CENTRALEN** eller **XXL KUNGENS KURVA**
 3. Tillåt webbläsaren att använda din position
-4. Se de 3 bästa resealternativen till Fruängen!
+4. Se de 3 bästa resealternativen till din valda destination!
 
 ## Teknisk stack
 
@@ -53,21 +53,22 @@ Appen körs nu på `http://localhost:8080`
 
 ## API:er som används
 
-### SL Platsuppslag (Typeahead)
+### SL Journey-planner v2
 
-Används för att hitta SiteId för Fruängen:
+Används för att hitta hållplatser och reseplanering (kräver ingen API-nyckel):
 
+**Hållplatssökning:**
 ```
-GET https://api.sl.se/api2/typeahead.json?key=<API_KEY>&searchstring=Fruängen&stationsonly=true&maxresults=1
+GET /api/sl/stop-finder?name_sf=Fruangen&any_obj_filter_sf=2&type_sf=any
 ```
 
-### SL Reseplanerare 3.1 (Trip)
-
-Används för att hämta reseförslag:
-
+**Reseplanering:**
 ```
-GET https://api.sl.se/api2/TravelplannerV3_1/trip.json?key=<API_KEY>&originCoordLat=<LAT>&originCoordLong=<LON>&destId=<DEST_ID>&numTrips=3
+GET /api/sl/trips?type_origin=coord&type_destination=any&name_origin=<LON>:<LAT>:WGS84[dd.ddddd]&name_destination=<DEST_ID>&calc_number_of_trips=3
 ```
+
+**CORS-lösning:**
+Appen använder en Vite-proxy för att undvika CORS-problem när API:et anropas från webbläsaren. Proxyn konfigureras i `vite.config.ts`.
 
 ## Integritet
 

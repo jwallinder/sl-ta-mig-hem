@@ -8,36 +8,44 @@ interface TripCardProps {
 }
 
 const TripCard = ({ trip, index }: TripCardProps) => {
-  const legs = trip.LegList.Leg;
+  const legs = trip.legs;
   const firstLeg = legs[0];
   const lastLeg = legs[legs.length - 1];
 
-  // Formatera tid från "HH:MM:SS" till "HH:MM"
-  const formatTime = (time: string) => {
-    return time.substring(0, 5);
+  // Formatera tid från ISO string till HH:MM
+  const formatTime = (isoString?: string) => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    return date.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
   };
 
-  // Formatera varaktighet från "HH:MM:SS" eller "MM:SS" till läsbar text
-  const formatDuration = (dur: string) => {
-    const parts = dur.split(":");
-    if (parts.length === 3) {
-      const hours = parseInt(parts[0]);
-      const minutes = parseInt(parts[1]);
-      if (hours > 0) {
-        return `${hours} tim ${minutes} min`;
-      }
-      return `${minutes} min`;
+  // Formatera varaktighet från sekunder till läsbar text
+  const formatDuration = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) {
+      return `${hours} tim ${minutes} min`;
     }
-    return dur;
+    return `${minutes} min`;
   };
 
-  // Ikoner baserat på transporttyp
-  const getTransportIcon = (leg: typeof legs[0]) => {
-    if (leg.type === "WALK") return "🚶";
-    if (leg.Product?.catCode === "1") return "🚇"; // Tunnelbana
-    if (leg.Product?.catCode === "2") return "🚌"; // Buss
-    if (leg.Product?.catCode === "3") return "🚊"; // Pendeltåg
-    return "🚍";
+  // Ikoner och namn baserat på transporttyp
+  const getTransportInfo = (leg: typeof legs[0]) => {
+    const productName = leg.transportation.product?.name || leg.transportation.type;
+    
+    if (productName === "footpath") {
+      return { icon: "🚶", name: "Gång" };
+    }
+    if (productName?.toLowerCase().includes("metro") || productName?.toLowerCase().includes("subway")) {
+      return { icon: "🚇", name: "Tunnelbana" };
+    }
+    if (productName?.toLowerCase().includes("bus")) {
+      return { icon: "🚌", name: "Buss" };
+    }
+    if (productName?.toLowerCase().includes("train")) {
+      return { icon: "🚊", name: "Pendeltåg" };
+    }
+    return { icon: "🚍", name: productName || "Transport" };
   };
 
   return (
@@ -45,44 +53,59 @@ const TripCard = ({ trip, index }: TripCardProps) => {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 text-sm">
           <Clock className="w-4 h-4 text-muted-foreground" />
-          <span className="font-semibold">{formatTime(firstLeg.Origin.time)}</span>
+          <span className="font-semibold">{formatTime(firstLeg.origin.departureTimePlanned || firstLeg.origin.departureTimeEstimated)}</span>
           <ArrowRight className="w-4 h-4 text-muted-foreground" />
-          <span className="font-semibold">{formatTime(lastLeg.Destination.time)}</span>
+          <span className="font-semibold">{formatTime(lastLeg.destination.arrivalTimePlanned || lastLeg.destination.arrivalTimeEstimated)}</span>
         </div>
-        <div className="text-sm text-muted-foreground">
-          {formatDuration(trip.dur)}
+        <div className="text-sm font-medium text-foreground">
+          {formatDuration(trip.tripDuration)}
         </div>
       </div>
 
-      <div className="space-y-2">
-        {legs.map((leg, legIndex) => (
-          <div key={legIndex} className="flex items-start gap-2 text-sm">
-            <span className="text-lg">{getTransportIcon(leg)}</span>
-            <div className="flex-1">
-              {leg.type === "WALK" ? (
-                <span className="text-foreground">
-                  Gå {leg.dist ? `${leg.dist} m` : "till nästa hållplats"}
-                </span>
-              ) : (
-                <div>
+      <div className="space-y-3">
+        {legs.map((leg, legIndex) => {
+          const transportInfo = getTransportInfo(leg);
+          const isWalking = leg.transportation.product?.name === "footpath";
+          
+          return (
+            <div key={legIndex} className="flex items-start gap-3 text-sm">
+              <span className="text-xl mt-0.5">{transportInfo.icon}</span>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-medium text-foreground">
-                    {leg.Product?.catOutL} {leg.Product?.num}
+                    {transportInfo.name}
                   </span>
-                  {legIndex < legs.length - 1 && (
-                    <span className="text-muted-foreground ml-1">
-                      → {leg.Destination.name}
+                  {!isWalking && leg.transportation.name && (
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                      {leg.transportation.name}
+                    </span>
+                  )}
+                  {!isWalking && leg.transportation.direction && (
+                    <span className="text-xs text-muted-foreground">
+                      mot {leg.transportation.direction}
                     </span>
                   )}
                 </div>
-              )}
+                <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                  <span>{formatTime(leg.origin.departureTimePlanned || leg.origin.departureTimeEstimated)}</span>
+                  <span>→</span>
+                  <span>{formatTime(leg.destination.arrivalTimePlanned || leg.destination.arrivalTimeEstimated)}</span>
+                  {isWalking && leg.distance && (
+                    <span className="ml-2">({leg.distance} m)</span>
+                  )}
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {leg.origin.name} → {leg.destination.name}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="flex items-center gap-1 mt-3 text-xs text-muted-foreground">
         <MapPin className="w-3 h-3" />
-        <span>Från {firstLeg.Origin.name}</span>
+        <span>Från {firstLeg.origin.name}</span>
       </div>
     </Card>
   );
