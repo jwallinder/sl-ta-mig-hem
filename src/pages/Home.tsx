@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin } from "lucide-react";
+import { Search, MapPin, Train, Bus, Navigation } from "lucide-react";
 import { toast } from "sonner";
 
 interface Station {
@@ -11,6 +11,60 @@ interface Station {
   disassembledName: string;
   coord: number[];
 }
+
+const getStationIcon = (stationName: string) => {
+  const name = stationName.toLowerCase();
+  
+  // Metro stations (T-bana)
+  if (name.includes('t-centralen') || name.includes('slussen') || 
+      name.includes('östermalmstorg') || name.includes('gamla stan') ||
+      name.includes('kungsträdgården') || name.includes('röda linjen') ||
+      name.includes('blå linjen') || name.includes('gröna linjen') ||
+      name.includes('gula linjen') || name.includes('metro') ||
+      name.includes('tunnelbana')) {
+    return <Train className="w-5 h-5 text-green-600" />;
+  }
+  
+  // Bus stations
+  if (name.includes('buss') || name.includes('bus') || 
+      name.includes('terminal') || name.includes('depå')) {
+    return <Bus className="w-5 h-5 text-blue-600" />;
+  }
+  
+  // Train stations
+  if (name.includes('central') || name.includes('station') || 
+      name.includes('järnväg') || name.includes('pendeltåg') ||
+      name.includes('tåg') || name.includes('train')) {
+    return <Train className="w-5 h-5 text-purple-600" />;
+  }
+  
+  // Default for other stations
+  return <MapPin className="w-5 h-5 text-blue-600" />;
+};
+
+const getStationType = (stationName: string) => {
+  const name = stationName.toLowerCase();
+  
+  if (name.includes('t-centralen') || name.includes('slussen') || 
+      name.includes('östermalmstorg') || name.includes('gamla stan') ||
+      name.includes('kungsträdgården') || name.includes('metro') ||
+      name.includes('tunnelbana')) {
+    return 'Tunnelbana';
+  }
+  
+  if (name.includes('buss') || name.includes('bus') || 
+      name.includes('terminal') || name.includes('depå')) {
+    return 'Buss';
+  }
+  
+  if (name.includes('central') || name.includes('station') || 
+      name.includes('järnväg') || name.includes('pendeltåg') ||
+      name.includes('tåg') || name.includes('train')) {
+    return 'Tåg';
+  }
+  
+  return 'Hållplats';
+};
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -133,16 +187,25 @@ const Home = () => {
                   {searchResults.map((station, index) => (
                     <button
                       key={station.id}
-                      className="w-full text-left px-4 py-3 hover:bg-muted transition-colors border-b border-border last:border-b-0"
+                      className="w-full text-left px-4 py-4 hover:bg-muted transition-colors border-b border-border last:border-b-0 focus:bg-muted focus:outline-none"
                       onClick={() => handleStationSelect(station)}
                     >
-                      <div className="flex items-center">
-                        <MapPin className="w-4 h-4 mr-3 flex-shrink-0 text-muted-foreground" />
-                        <div>
-                          <div className="font-medium">{station.name}</div>
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0 mt-0.5">
+                          {getStationIcon(station.name)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-base text-foreground leading-tight">
+                            {station.name}
+                          </div>
                           {station.disassembledName && station.disassembledName !== station.name && (
-                            <div className="text-xs text-muted-foreground">{station.disassembledName}</div>
+                            <div className="text-sm text-muted-foreground mt-1 leading-tight">
+                              {station.disassembledName}
+                            </div>
                           )}
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {getStationType(station.name)}
+                          </div>
                         </div>
                       </div>
                     </button>

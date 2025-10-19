@@ -6,7 +6,61 @@ import TripCard from "@/components/TripCard";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorMessage from "@/components/ErrorMessage";
 import { toast } from "sonner";
-import { MapPin, Search } from "lucide-react";
+import { MapPin, Search, Train, Bus } from "lucide-react";
+
+const getStationIcon = (stationName: string) => {
+  const name = stationName.toLowerCase();
+  
+  // Metro stations (T-bana)
+  if (name.includes('t-centralen') || name.includes('slussen') || 
+      name.includes('östermalmstorg') || name.includes('gamla stan') ||
+      name.includes('kungsträdgården') || name.includes('röda linjen') ||
+      name.includes('blå linjen') || name.includes('gröna linjen') ||
+      name.includes('gula linjen') || name.includes('metro') ||
+      name.includes('tunnelbana')) {
+    return <Train className="w-5 h-5 text-green-600" />;
+  }
+  
+  // Bus stations
+  if (name.includes('buss') || name.includes('bus') || 
+      name.includes('terminal') || name.includes('depå')) {
+    return <Bus className="w-5 h-5 text-blue-600" />;
+  }
+  
+  // Train stations
+  if (name.includes('central') || name.includes('station') || 
+      name.includes('järnväg') || name.includes('pendeltåg') ||
+      name.includes('tåg') || name.includes('train')) {
+    return <Train className="w-5 h-5 text-purple-600" />;
+  }
+  
+  // Default for other stations
+  return <MapPin className="w-5 h-5 text-blue-600" />;
+};
+
+const getStationType = (stationName: string) => {
+  const name = stationName.toLowerCase();
+  
+  if (name.includes('t-centralen') || name.includes('slussen') || 
+      name.includes('östermalmstorg') || name.includes('gamla stan') ||
+      name.includes('kungsträdgården') || name.includes('metro') ||
+      name.includes('tunnelbana')) {
+    return 'Tunnelbana';
+  }
+  
+  if (name.includes('buss') || name.includes('bus') || 
+      name.includes('terminal') || name.includes('depå')) {
+    return 'Buss';
+  }
+  
+  if (name.includes('central') || name.includes('station') || 
+      name.includes('järnväg') || name.includes('pendeltåg') ||
+      name.includes('tåg') || name.includes('train')) {
+    return 'Tåg';
+  }
+  
+  return 'Hållplats';
+};
 
 // Funktion för att beräkna avstånd mellan två koordinater (Haversine formula)
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -280,29 +334,42 @@ const Index = () => {
 
             {/* Search Results */}
             {searchResults.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-foreground">Hållplatser:</h3>
+              <div className="space-y-3">
+                <h3 className="text-base font-semibold text-foreground">Hållplatser:</h3>
                 {searchResults.map((location, index) => (
                   <Button
                     key={index}
                     variant="outline"
-                    className="w-full justify-start text-left h-auto p-3"
+                    className="w-full justify-start text-left h-auto p-4 hover:bg-muted transition-colors"
                     onClick={() => handleSelectDestination(location)}
                   >
-                    <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <div className="flex-1">
-                      <div className="font-medium">{location.name}</div>
-                      {location.disassembledName && location.disassembledName !== location.name && (
-                        <div className="text-xs text-muted-foreground">{location.disassembledName}</div>
-                      )}
-                      {location.coord && userCoords && (
-                        <div className="text-xs text-muted-foreground mt-1">
-                          Avstånd: {Math.round(calculateDistance(
-                            location.coord[1], location.coord[0],
-                            userCoords.lat, userCoords.lon
-                          ))} m
+                    <div className="flex items-start space-x-3 w-full">
+                      <div className="flex-shrink-0 mt-0.5">
+                        {getStationIcon(location.name)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-base text-foreground leading-tight">
+                          {location.name}
                         </div>
-                      )}
+                        {location.disassembledName && location.disassembledName !== location.name && (
+                          <div className="text-sm text-muted-foreground mt-1 leading-tight">
+                            {location.disassembledName}
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between mt-2">
+                          <div className="text-xs text-muted-foreground">
+                            {getStationType(location.name)}
+                          </div>
+                          {location.coord && userCoords && (
+                            <div className="text-xs text-muted-foreground">
+                              {Math.round(calculateDistance(
+                                location.coord[1], location.coord[0],
+                                userCoords.lat, userCoords.lon
+                              ))} m bort
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </Button>
                 ))}
