@@ -4,6 +4,9 @@
 // Använd direkt SL API för production, proxy för development
 const JOURNEY_PLANNER_V2_URL = import.meta.env.DEV ? "/api/sl" : "https://journeyplanner.integration.sl.se/v2";
 
+// Export the URL for use in other components
+export { JOURNEY_PLANNER_V2_URL };
+
 // Cache för hållplatser
 let siteIdCache: { [key: string]: string } = {};
 

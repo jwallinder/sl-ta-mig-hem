@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin, Train, Bus, Navigation, Zap, Ship, Car } from "lucide-react";
 import { toast } from "sonner";
+import { JOURNEY_PLANNER_V2_URL } from "@/api/sl";
 
 interface Station {
   id: string;
@@ -160,7 +161,7 @@ const Home = () => {
   const searchStations = async (query: string) => {
     setIsSearching(true);
     try {
-      const response = await fetch(`/api/sl/stop-finder?name_sf=${encodeURIComponent(query)}&any_obj_filter_sf=2&type_sf=any`);
+      const response = await fetch(`${JOURNEY_PLANNER_V2_URL}/stop-finder?name_sf=${encodeURIComponent(query)}&any_obj_filter_sf=2&type_sf=any`);
       
       if (!response.ok) {
         throw new Error(`Sökfel: ${response.status}`);

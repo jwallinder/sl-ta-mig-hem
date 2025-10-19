@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getSiteId, getTripsFromCoordsToDest, getNearbyStops, Trip } from "@/api/sl";
+import { getSiteId, getTripsFromCoordsToDest, getNearbyStops, Trip, JOURNEY_PLANNER_V2_URL } from "@/api/sl";
 import TripCard from "@/components/TripCard";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorMessage from "@/components/ErrorMessage";
@@ -155,7 +155,7 @@ const Index = () => {
 
     try {
       // Först försök att hitta hållplatser direkt
-      const response = await fetch(`/api/sl/stop-finder?name_sf=${encodeURIComponent(searchQuery)}&any_obj_filter_sf=46&type_sf=any`);
+      const response = await fetch(`${JOURNEY_PLANNER_V2_URL}/stop-finder?name_sf=${encodeURIComponent(searchQuery)}&any_obj_filter_sf=46&type_sf=any`);
       
       if (!response.ok) {
         throw new Error(`Sökfel: ${response.status}`);
@@ -195,7 +195,7 @@ const Index = () => {
           // Om geokodningen misslyckas, försök med textbaserad sökning som sista utväg
           setLoadingMessage("Försöker hitta hållplatser med textbaserad sökning...");
           
-          const textSearchResponse = await fetch(`/api/sl/stop-finder?name_sf=${encodeURIComponent(searchQuery)}&any_obj_filter_sf=2&type_sf=any`);
+          const textSearchResponse = await fetch(`${JOURNEY_PLANNER_V2_URL}/stop-finder?name_sf=${encodeURIComponent(searchQuery)}&any_obj_filter_sf=2&type_sf=any`);
           
           if (textSearchResponse.ok) {
             const textSearchData = await textSearchResponse.json();
@@ -229,7 +229,7 @@ const Index = () => {
           const streetName = searchQuery.split(' ')[0]; // Ta första ordet som gatunamn
           
           // Försök först med gatunamn
-          let textSearchResponse = await fetch(`/api/sl/stop-finder?name_sf=${encodeURIComponent(streetName)}&any_obj_filter_sf=2&type_sf=any`);
+          let textSearchResponse = await fetch(`${JOURNEY_PLANNER_V2_URL}/stop-finder?name_sf=${encodeURIComponent(streetName)}&any_obj_filter_sf=2&type_sf=any`);
           
           if (textSearchResponse.ok) {
             const textSearchData = await textSearchResponse.json();
@@ -240,7 +240,7 @@ const Index = () => {
           
           // Om fortfarande inga hållplatser, försök med hela söktermen
           if (nearbyStops.length === 0) {
-            textSearchResponse = await fetch(`/api/sl/stop-finder?name_sf=${encodeURIComponent(searchQuery)}&any_obj_filter_sf=2&type_sf=any`);
+            textSearchResponse = await fetch(`${JOURNEY_PLANNER_V2_URL}/stop-finder?name_sf=${encodeURIComponent(searchQuery)}&any_obj_filter_sf=2&type_sf=any`);
             
             if (textSearchResponse.ok) {
               const textSearchData = await textSearchResponse.json();
