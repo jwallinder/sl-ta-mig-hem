@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin, Train, Bus, Navigation } from "lucide-react";
+import { Search, MapPin, Train, Bus, Navigation, Zap, Ship, Car } from "lucide-react";
 import { toast } from "sonner";
 
 interface Station {
@@ -10,60 +10,129 @@ interface Station {
   name: string;
   disassembledName: string;
   coord: number[];
+  type: string;
+  productClasses?: number[];
+  parent?: {
+    isGlobalId: boolean;
+    id: string;
+    name: string;
+    disassembledName: string;
+    type: string;
+    coord: number[];
+    niveau: number;
+    productClasses?: number[];
+  };
 }
 
-const getStationIcon = (stationName: string) => {
-  const name = stationName.toLowerCase();
-  
-  // Metro stations (T-bana)
-  if (name.includes('t-centralen') || name.includes('slussen') || 
-      name.includes('östermalmstorg') || name.includes('gamla stan') ||
-      name.includes('kungsträdgården') || name.includes('röda linjen') ||
-      name.includes('blå linjen') || name.includes('gröna linjen') ||
-      name.includes('gula linjen') || name.includes('metro') ||
-      name.includes('tunnelbana')) {
-    return <Train className="w-5 h-5 text-green-600" />;
+// Mappning av SL API productClasses till ikoner och färger
+const getTransportModeInfoFromProductClass = (productClass: number) => {
+  switch (productClass) {
+    case 0: // train (pendeltåg)
+      return { icon: Train, color: 'text-purple-600', label: 'Pendeltåg' };
+    case 2: // metro (tunnelbana)
+      return { icon: Train, color: 'text-green-600', label: 'Tunnelbana' };
+    case 4: // train/tram (lokaltåg/spårväg)
+      return { icon: Zap, color: 'text-orange-600', label: 'Lokaltåg/Spårvagn' };
+    case 5: // bus (buss)
+      return { icon: Bus, color: 'text-blue-600', label: 'Buss' };
+    case 9: // ship and ferry (båttrafik)
+      return { icon: Ship, color: 'text-cyan-600', label: 'Färja' };
+    case 10: // transit on demand area service (anropsstyrd områdestrafik)
+      return { icon: Car, color: 'text-yellow-600', label: 'Anropsstyrd trafik' };
+    case 14: // long distance/express train
+      return { icon: Train, color: 'text-red-600', label: 'Express tåg' };
+    default:
+      return { icon: MapPin, color: 'text-gray-600', label: 'Okänd trafikslag' };
   }
-  
-  // Bus stations
-  if (name.includes('buss') || name.includes('bus') || 
-      name.includes('terminal') || name.includes('depå')) {
-    return <Bus className="w-5 h-5 text-blue-600" />;
-  }
-  
-  // Train stations
-  if (name.includes('central') || name.includes('station') || 
-      name.includes('järnväg') || name.includes('pendeltåg') ||
-      name.includes('tåg') || name.includes('train')) {
-    return <Train className="w-5 h-5 text-purple-600" />;
-  }
-  
-  // Default for other stations
-  return <MapPin className="w-5 h-5 text-blue-600" />;
 };
 
-const getStationType = (stationName: string) => {
-  const name = stationName.toLowerCase();
+// Fallback mappning baserat på typ (för bakåtkompatibilitet)
+const getTransportModeInfoFromType = (type: string) => {
+  const typeLower = type.toLowerCase();
   
-  if (name.includes('t-centralen') || name.includes('slussen') || 
-      name.includes('östermalmstorg') || name.includes('gamla stan') ||
-      name.includes('kungsträdgården') || name.includes('metro') ||
-      name.includes('tunnelbana')) {
-    return 'Tunnelbana';
+  if (typeLower.includes('metro') || typeLower.includes('tunnelbana') || typeLower.includes('subway')) {
+    return { icon: Train, color: 'text-green-600', label: 'Tunnelbana' };
+  }
+  if (typeLower.includes('bus') || typeLower.includes('buss')) {
+    return { icon: Bus, color: 'text-blue-600', label: 'Buss' };
+  }
+  if (typeLower.includes('train') || typeLower.includes('tåg') || typeLower.includes('rail') || typeLower.includes('pendeltåg')) {
+    return { icon: Train, color: 'text-purple-600', label: 'Tåg' };
+  }
+  if (typeLower.includes('tram') || typeLower.includes('spårvagn') || typeLower.includes('lightrail')) {
+    return { icon: Zap, color: 'text-orange-600', label: 'Spårvagn' };
+  }
+  if (typeLower.includes('ferry') || typeLower.includes('färja') || typeLower.includes('boat')) {
+    return { icon: Ship, color: 'text-cyan-600', label: 'Färja' };
+  }
+  if (typeLower.includes('taxi') || typeLower.includes('car')) {
+    return { icon: Car, color: 'text-yellow-600', label: 'Taxi' };
   }
   
-  if (name.includes('buss') || name.includes('bus') || 
-      name.includes('terminal') || name.includes('depå')) {
-    return 'Buss';
+  // Default fallback
+  return { icon: MapPin, color: 'text-gray-600', label: 'Hållplats' };
+};
+
+// Hämta alla trafikslag för en station baserat på productClasses
+const getStationTransportModes = (station: Station) => {
+  const productClasses = new Set<number>();
+  
+  // Lägg till huvudstationens productClasses
+  if (station.productClasses && station.productClasses.length > 0) {
+    station.productClasses.forEach(pc => productClasses.add(pc));
   }
   
-  if (name.includes('central') || name.includes('station') || 
-      name.includes('järnväg') || name.includes('pendeltåg') ||
-      name.includes('tåg') || name.includes('train')) {
-    return 'Tåg';
+  // Lägg till parent stationens productClasses om den finns
+  if (station.parent?.productClasses && station.parent.productClasses.length > 0) {
+    station.parent.productClasses.forEach(pc => productClasses.add(pc));
   }
   
-  return 'Hållplats';
+  return Array.from(productClasses);
+};
+
+// Skapa ikoner för alla trafikslag
+const getStationIcons = (station: Station) => {
+  const productClasses = getStationTransportModes(station);
+  
+  if (productClasses.length === 0) {
+    // Fallback till typ-baserad gissning
+    if (station.type) {
+      return [getTransportModeInfoFromType(station.type)];
+    }
+    
+    // Fallback till namn-baserad gissning
+    const name = station.name.toLowerCase();
+    if (name.includes('t-centralen') || name.includes('slussen')) {
+      return [{ icon: Train, color: 'text-green-600', label: 'Tunnelbana' }];
+    }
+    return [{ icon: MapPin, color: 'text-gray-600', label: 'Hållplats' }];
+  }
+  
+  return productClasses.map(pc => getTransportModeInfoFromProductClass(pc));
+};
+
+// Skapa en sammanfattning av trafikslag
+const getStationTypeSummary = (station: Station) => {
+  const productClasses = getStationTransportModes(station);
+  
+  if (productClasses.length === 0) {
+    // Fallback till typ-baserad gissning
+    if (station.type) {
+      return getTransportModeInfoFromType(station.type).label;
+    }
+    return 'Hållplats';
+  }
+  
+  const modeInfo = productClasses.map(pc => getTransportModeInfoFromProductClass(pc));
+  const labels = modeInfo.map(info => info.label);
+  
+  if (labels.length === 1) {
+    return labels[0];
+  } else if (labels.length <= 3) {
+    return labels.join(', ');
+  } else {
+    return `${labels.slice(0, 2).join(', ')} +${labels.length - 2} fler`;
+  }
 };
 
 const Home = () => {
@@ -192,7 +261,16 @@ const Home = () => {
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0 mt-0.5">
-                          {getStationIcon(station.name)}
+                          <div className="flex items-center space-x-1">
+                            {getStationIcons(station).map((modeInfo, index) => {
+                              const IconComponent = modeInfo.icon;
+                              return (
+                                <div key={index} className="flex items-center">
+                                  <IconComponent className={`w-4 h-4 ${modeInfo.color}`} />
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-base text-foreground leading-tight">
@@ -204,7 +282,7 @@ const Home = () => {
                             </div>
                           )}
                           <div className="text-xs text-muted-foreground mt-1">
-                            {getStationType(station.name)}
+                            {getStationTypeSummary(station)}
                           </div>
                         </div>
                       </div>
