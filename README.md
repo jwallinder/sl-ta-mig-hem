@@ -1,16 +1,17 @@
-# Stockholm Direkt
+# SL ta mig hem
 
-En minimalistisk mobilapp för att snabbt hitta bästa kollektivtrafikresan från din plats till populära destinationer i Stockholm.
+En minimalistisk mobilapp för att snabbt hitta bästa kollektivtrafikresan från din plats till din destination med SL.
 
 ## Funktioner
 
-- ✅ Ett klick för att söka resor till Fruängen, T-Centralen eller XXL Kungens Kurva
+- ✅ Sök efter valfri station eller destination
 - ✅ Automatisk geolokalisering
 - ✅ Realtidsdata från SL
 - ✅ Visa 3 bästa reseförslag
 - ✅ Detaljerad visning av varje resa med linjenummer och byten
 - ✅ Mobiloptimerad design
 - ✅ Ingen permanent lagring av positionsdata
+- ✅ Visar trafikslag (tunnelbana, buss, tåg, buss) för varje station
 
 ## Installation
 
@@ -38,7 +39,7 @@ Appen körs nu på `http://localhost:8080`
 ## Användning
 
 1. Öppna appen i din mobila webbläsare eller desktop
-2. Välj destination: **FRUÄNGEN**, **T-CENTRALEN** eller **XXL KUNGENS KURVA**
+2. Sök efter din önskade destination eller välj från snabbval
 3. Tillåt webbläsaren att använda din position
 4. Se de 3 bästa resealternativen till din valda destination!
 
@@ -59,7 +60,7 @@ Används för att hitta hållplatser och reseplanering (kräver ingen API-nyckel
 
 **Hållplatssökning:**
 ```
-GET /api/sl/stop-finder?name_sf=Fruangen&any_obj_filter_sf=2&type_sf=any
+GET /api/sl/stop-finder?name_sf=<STATION_NAME>&any_obj_filter_sf=2&type_sf=any
 ```
 
 **Reseplanering:**

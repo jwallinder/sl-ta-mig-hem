@@ -208,7 +208,7 @@ const Home = () => {
       <header className="w-full py-6 px-4 border-b border-border">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Stockholm Direkt
+            SL ta mig hem
           </h1>
           <p className="text-sm text-muted-foreground">
             Sök efter en station för att hitta reseförslag
