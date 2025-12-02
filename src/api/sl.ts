@@ -191,7 +191,7 @@ export async function getTripsFromCoordsToDest(
     const data = await response.json();
 
     if (!data.journeys || data.journeys.length === 0) {
-      throw new Error("Inga resor hittades");
+      return [];
     }
 
     return data.journeys;

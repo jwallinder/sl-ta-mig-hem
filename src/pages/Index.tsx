@@ -264,7 +264,7 @@ const Index = () => {
         setSearchResults(nearbyStops.slice(0, 5));
         toast.success(`Hittade ${nearbyStops.length} närliggande hållplatser`);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Search error:", err);
       setError("Kunde inte söka efter hållplatser. Kontrollera din internetanslutning.");
     } finally {
@@ -319,27 +319,36 @@ const Index = () => {
       );
 
       setTrips(fetchedTrips);
-      toast.success(`Hittade ${fetchedTrips.length} resor till ${destination}!`);
-    } catch (err: any) {
+      if (fetchedTrips.length > 0) {
+        toast.success(`Hittade ${fetchedTrips.length} resor till ${destination}!`);
+      }
+    } catch (err: unknown) {
       console.error("Error fetching trips:", err);
 
-      if (err.code === 1) {
-        // PERMISSION_DENIED
-        setError("Du behöver tillåta plats för att söka resor.");
-      } else if (err.code === 2) {
-        // POSITION_UNAVAILABLE
-        setError("Din position kunde inte hittas. Kontrollera dina inställningar.");
-      } else if (err.code === 3) {
-        // TIMEOUT
-        setError("Det tog för lång tid att hitta din position. Försök igen.");
-      } else if (err.message && err.message.includes("internetanslutning")) {
-        setError("Problem med internetanslutning. Kontrollera att du är ansluten till internet och försök igen.");
-      } else if (err.message && err.message.includes("Fel vid uppslag")) {
-        setError("Kunde inte hitta Fruängen-hållplatsen. Kontrollera din internetanslutning.");
-      } else if (err.message && err.message.includes("Fel vid hämtning av resor")) {
-        setError("Kunde inte hämta reseförslag. Kontrollera din internetanslutning.");
-      } else if (err.message) {
-        setError(err.message);
+      if (err && typeof err === 'object' && 'code' in err) {
+        const geolocationError = err as GeolocationPositionError;
+        if (geolocationError.code === 1) {
+          // PERMISSION_DENIED
+          setError("Du behöver tillåta plats för att söka resor.");
+        } else if (geolocationError.code === 2) {
+          // POSITION_UNAVAILABLE
+          setError("Din position kunde inte hittas. Kontrollera dina inställningar.");
+        } else if (geolocationError.code === 3) {
+          // TIMEOUT
+          setError("Det tog för lång tid att hitta din position. Försök igen.");
+        } else {
+          setError("Ett oväntat fel uppstod. Försök igen.");
+        }
+      } else if (err instanceof Error) {
+        if (err.message.includes("internetanslutning")) {
+          setError("Problem med internetanslutning. Kontrollera att du är ansluten till internet och försök igen.");
+        } else if (err.message.includes("Fel vid uppslag")) {
+          setError("Kunde inte hitta Fruängen-hållplatsen. Kontrollera din internetanslutning.");
+        } else if (err.message.includes("Fel vid hämtning av resor")) {
+          setError("Kunde inte hämta reseförslag. Kontrollera din internetanslutning.");
+        } else {
+          setError(err.message);
+        }
       } else {
         setError("Ett oväntat fel uppstod. Försök igen.");
       }
@@ -513,11 +522,31 @@ const Index = () => {
               ))}
             </div>
           )}
+
+          {/* No trips found message */}
+          {trips.length === 0 && !loading && !error && userCoords && selectedDestination && (
+            <div className="text-center py-8">
+              <MapPin className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">
+                Inga resor kan hittas till din destination
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Det gick inte att hitta några reseförslag till {selectedDestination}. Prova att söka efter en annan destination.
+              </p>
+            </div>
+          )}
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="w-full py-4 px-4 border-t border-border text-center">
+      <footer className="w-full py-4 px-4 border-t border-border text-center space-x-4">
+        <a
+          href="/about"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
+        >
+          Om oss
+        </a>
+        <span className="text-sm text-muted-foreground">•</span>
         <a
           href="/privacy"
           className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
