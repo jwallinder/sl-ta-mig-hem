@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MapPin, ArrowLeft, Clock } from "lucide-react";
@@ -18,8 +18,9 @@ const Station = () => {
   const [userCoords, setUserCoords] = useState<{lat: number, lon: number} | null>(null);
 
   const decodedStationName = stationName ? decodeURIComponent(stationName) : "";
+  const [hasAutoSearched, setHasAutoSearched] = useState(false);
 
-  const handleGetTrips = async () => {
+  const handleGetTrips = useCallback(async () => {
     if (!decodedStationName) return;
 
     setError(null);
@@ -97,20 +98,19 @@ const Station = () => {
       setLoading(false);
       setLoadingMessage("");
     }
-  };
+  }, [decodedStationName]);
 
-  // Auto-focus effect
+  // Auto-search when component mounts
   useEffect(() => {
-    if (decodedStationName) {
-      // Small delay to ensure component is mounted
-      const timer = setTimeout(() => {
-        const button = document.getElementById('get-trips-button');
-        if (button) {
-          button.focus();
-        }
-      }, 100);
-      return () => clearTimeout(timer);
+    if (decodedStationName && !hasAutoSearched) {
+      setHasAutoSearched(true);
+      handleGetTrips();
     }
+  }, [decodedStationName, hasAutoSearched, handleGetTrips]);
+
+  // Reset auto-search flag when station name changes
+  useEffect(() => {
+    setHasAutoSearched(false);
   }, [decodedStationName]);
 
   if (!decodedStationName) {
@@ -147,7 +147,7 @@ const Station = () => {
             {decodedStationName}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Klicka på knappen nedan för att hitta reseförslag från din plats
+            Söker efter reseförslag från din plats...
           </p>
         </div>
       </header>
@@ -165,7 +165,7 @@ const Station = () => {
               disabled={loading}
             >
               <MapPin className="w-6 h-6 mr-3" />
-              Hämta reseförslag till {decodedStationName}
+              {loading ? 'Söker reseförslag...' : 'Uppdatera reseförslag till ' + decodedStationName}
             </Button>
           </div>
 
