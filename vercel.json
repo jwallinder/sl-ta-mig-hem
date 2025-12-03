@@ -4,6 +4,10 @@
     {
       "source": "/api/sl/(.*)",
       "destination": "https://journeyplanner.integration.sl.se/v2/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
