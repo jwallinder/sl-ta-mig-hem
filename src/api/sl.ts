@@ -1,8 +1,8 @@
 // SL API Client - Using new SL Journey-planner v2 API (no API key required)
-// Uses Vite proxy for development, direct API for production
+// Always uses proxy to avoid CORS issues
 
-// Använd direkt SL API för production, proxy för development
-const JOURNEY_PLANNER_V2_URL = import.meta.env.DEV ? "/api/sl" : "https://journeyplanner.integration.sl.se/v2";
+// Använd alltid proxy för att undvika CORS-problem
+const JOURNEY_PLANNER_V2_URL = "/api/sl";
 
 // Export the URL for use in other components
 export { JOURNEY_PLANNER_V2_URL };
