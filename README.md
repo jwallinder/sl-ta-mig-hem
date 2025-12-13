@@ -19,7 +19,7 @@ En minimalistisk mobilapp för att snabbt hitta bästa kollektivtrafikresan frå
 
 ```bash
 git clone <repository-url>
-cd fruangen-direkt
+cd sl-ta-mig-hem
 ```
 
 ### 2. Installera beroenden

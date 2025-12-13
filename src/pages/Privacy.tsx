@@ -27,7 +27,7 @@ const Privacy = () => {
               Din integritet
             </h2>
             <p className="text-foreground mb-4">
-              Fruängen Direkt respekterar din integritet och hanterar dina personuppgifter
+              SL ta mig hem respekterar din integritet och hanterar dina personuppgifter
               med största försiktighet.
             </p>
           </section>
