@@ -1,14 +1,14 @@
 // SL API Client - Using new SL Journey-planner v2 API (no API key required)
 // Always uses proxy to avoid CORS issues
 
-// Använd alltid proxy för att undvika CORS-problem
+// Always use proxy to avoid CORS issues
 const JOURNEY_PLANNER_V2_URL = "/api/sl";
 
 // Export the URL for use in other components
 export { JOURNEY_PLANNER_V2_URL };
 
-// Cache för hållplatser
-let siteIdCache: { [key: string]: string } = {};
+// Cache for stops
+const siteIdCache: { [key: string]: string } = {};
 
 export interface StopFinderResponse {
   locations: Array<{
@@ -78,8 +78,8 @@ export interface Trip {
 }
 
 /**
- * Hämta SiteId för en hållplats från SL Journey-planner v2 API
- * Cachas efter första anropet
+ * Get SiteId for a stop from SL Journey-planner v2 API
+ * Cached after first call
  */
 export async function getSiteId(destination: string): Promise<string> {
   if (siteIdCache[destination]) {
@@ -104,7 +104,7 @@ export async function getSiteId(destination: string): Promise<string> {
       throw new Error(`Kunde inte hitta hållplatsen ${destination} just nu`);
     }
 
-    // Hitta destinationen i resultaten
+    // Find the destination in the results
     const location = data.locations.find(loc => 
       loc.name.toLowerCase().includes(destination.toLowerCase())
     );
@@ -122,8 +122,8 @@ export async function getSiteId(destination: string): Promise<string> {
 }
 
 /**
- * Hämta närliggande hållplatser baserat på koordinater
- * Använder SL Journey-planner v2 API
+ * Get nearby stops based on coordinates
+ * Uses SL Journey-planner v2 API
  */
 export async function getNearbyStops(
   lat: number,
@@ -158,8 +158,8 @@ export async function getNearbyStops(
 }
 
 /**
- * Hämta reseförslag från användarens koordinater till en destination
- * Använder SL Journey-planner v2 API
+ * Get trip suggestions from user's coordinates to a destination
+ * Uses SL Journey-planner v2 API
  */
 export async function getTripsFromCoordsToDest(
   lat: number,
@@ -167,7 +167,7 @@ export async function getTripsFromCoordsToDest(
   destId: string
 ): Promise<Trip[]> {
   try {
-    // Konvertera koordinater till format som API:et förväntar sig
+    // Convert coordinates to format expected by the API
     const originCoord = `${lon}:${lat}:WGS84[dd.ddddd]`;
     
     const params = new URLSearchParams({

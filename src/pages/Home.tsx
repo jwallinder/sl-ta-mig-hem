@@ -25,20 +25,20 @@ interface Station {
   };
 }
 
-// Mappning av SL API productClasses till ikoner och färger
+// Mapping of SL API productClasses to icons and colors
 const getTransportModeInfoFromProductClass = (productClass: number) => {
   switch (productClass) {
-    case 0: // train (pendeltåg)
+    case 0: // train
       return { icon: Train, color: 'text-purple-600', label: 'Pendeltåg' };
-    case 2: // metro (tunnelbana)
+    case 2: // metro
       return { icon: Train, color: 'text-green-600', label: 'Tunnelbana' };
-    case 4: // train/tram (lokaltåg/spårväg)
+    case 4: // train/tram
       return { icon: Zap, color: 'text-orange-600', label: 'Lokaltåg/Spårvagn' };
-    case 5: // bus (buss)
+    case 5: // bus
       return { icon: Bus, color: 'text-blue-600', label: 'Buss' };
-    case 9: // ship and ferry (båttrafik)
+    case 9: // ship and ferry
       return { icon: Ship, color: 'text-cyan-600', label: 'Färja' };
-    case 10: // transit on demand area service (anropsstyrd områdestrafik)
+    case 10: // transit on demand area service
       return { icon: Car, color: 'text-yellow-600', label: 'Anropsstyrd trafik' };
     case 14: // long distance/express train
       return { icon: Train, color: 'text-red-600', label: 'Express tåg' };
@@ -47,7 +47,7 @@ const getTransportModeInfoFromProductClass = (productClass: number) => {
   }
 };
 
-// Fallback mappning baserat på typ (för bakåtkompatibilitet)
+// Fallback mapping based on type (for backward compatibility)
 const getTransportModeInfoFromType = (type: string) => {
   const typeLower = type.toLowerCase();
   
@@ -74,16 +74,16 @@ const getTransportModeInfoFromType = (type: string) => {
   return { icon: MapPin, color: 'text-gray-600', label: 'Hållplats' };
 };
 
-// Hämta alla trafikslag för en station baserat på productClasses
+// Get all transport modes for a station based on productClasses
 const getStationTransportModes = (station: Station) => {
   const productClasses = new Set<number>();
   
-  // Lägg till huvudstationens productClasses
+  // Add main station's productClasses
   if (station.productClasses && station.productClasses.length > 0) {
     station.productClasses.forEach(pc => productClasses.add(pc));
   }
   
-  // Lägg till parent stationens productClasses om den finns
+  // Add parent station's productClasses if it exists
   if (station.parent?.productClasses && station.parent.productClasses.length > 0) {
     station.parent.productClasses.forEach(pc => productClasses.add(pc));
   }
@@ -91,17 +91,17 @@ const getStationTransportModes = (station: Station) => {
   return Array.from(productClasses);
 };
 
-// Skapa ikoner för alla trafikslag
+// Create icons for all transport modes
 const getStationIcons = (station: Station) => {
   const productClasses = getStationTransportModes(station);
   
   if (productClasses.length === 0) {
-    // Fallback till typ-baserad gissning
+    // Fallback to type-based guess
     if (station.type) {
       return [getTransportModeInfoFromType(station.type)];
     }
     
-    // Fallback till namn-baserad gissning
+    // Fallback to name-based guess
     const name = station.name.toLowerCase();
     if (name.includes('t-centralen') || name.includes('slussen')) {
       return [{ icon: Train, color: 'text-green-600', label: 'Tunnelbana' }];
@@ -112,12 +112,12 @@ const getStationIcons = (station: Station) => {
   return productClasses.map(pc => getTransportModeInfoFromProductClass(pc));
 };
 
-// Skapa en sammanfattning av trafikslag
+// Create a summary of transport modes
 const getStationTypeSummary = (station: Station) => {
   const productClasses = getStationTransportModes(station);
   
   if (productClasses.length === 0) {
-    // Fallback till typ-baserad gissning
+    // Fallback to type-based guess
     if (station.type) {
       return getTransportModeInfoFromType(station.type).label;
     }

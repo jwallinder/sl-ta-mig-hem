@@ -12,14 +12,14 @@ const TripCard = ({ trip, index }: TripCardProps) => {
   const firstLeg = legs[0];
   const lastLeg = legs[legs.length - 1];
 
-  // Formatera tid från ISO string till HH:MM
+  // Format time from ISO string to HH:MM
   const formatTime = (isoString?: string) => {
     if (!isoString) return "";
     const date = new Date(isoString);
     return date.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
   };
 
-  // Formatera varaktighet från sekunder till läsbar text
+  // Format duration from seconds to readable text
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -29,7 +29,7 @@ const TripCard = ({ trip, index }: TripCardProps) => {
     return `${minutes} min`;
   };
 
-  // Ikoner och namn baserat på transporttyp
+  // Icons and names based on transport type
   const getTransportInfo = (leg: typeof legs[0]) => {
     const productName = leg.transportation.product?.name || leg.transportation.type;
     

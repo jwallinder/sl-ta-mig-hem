@@ -28,7 +28,7 @@ const Station = () => {
     setTrips([]);
     setOriginName(null);
 
-    // Kontrollera om geolocation finns
+    // Check if geolocation is available
     if (!navigator.geolocation) {
       setError("Din webbläsare stöder inte positionering.");
       return;
@@ -38,7 +38,7 @@ const Station = () => {
     setLoadingMessage("Hämtar position...");
 
     try {
-      // Hämta användarens position
+      // Get user's position
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
@@ -50,11 +50,11 @@ const Station = () => {
       const { latitude, longitude } = position.coords;
       setUserCoords({ lat: latitude, lon: longitude });
 
-      // Hämta destination SiteId
+      // Get destination SiteId
       setLoadingMessage("Hämtar hållplatsinformation...");
       const siteId = await getSiteId(decodedStationName);
 
-      // Hämta resor
+      // Get trips
       setLoadingMessage("Hämtar reseförslag...");
       const fetchedTrips = await getTripsFromCoordsToDest(
         latitude,
@@ -64,7 +64,7 @@ const Station = () => {
 
       setTrips(fetchedTrips);
       if (fetchedTrips.length > 0) {
-        // Hämta platsnamnet från första resans första ben
+        // Get origin name from first trip's first leg
         const firstTrip = fetchedTrips[0];
         if (firstTrip.legs && firstTrip.legs.length > 0) {
           const originName = firstTrip.legs[0].origin.disassembledName;

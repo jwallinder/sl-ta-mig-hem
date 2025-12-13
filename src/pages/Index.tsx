@@ -8,20 +8,20 @@ import ErrorMessage from "@/components/ErrorMessage";
 import { toast } from "sonner";
 import { MapPin, Search, Train, Bus, Zap, Ship, Car } from "lucide-react";
 
-// Mappning av SL API productClasses till ikoner och färger
+// Mapping of SL API productClasses to icons and colors
 const getTransportModeInfoFromProductClass = (productClass: number) => {
   switch (productClass) {
-    case 0: // train (pendeltåg)
+    case 0: // train
       return { icon: Train, color: 'text-purple-600', label: 'Pendeltåg' };
-    case 2: // metro (tunnelbana)
+    case 2: // metro
       return { icon: Train, color: 'text-green-600', label: 'Tunnelbana' };
-    case 4: // train/tram (lokaltåg/spårväg)
+    case 4: // train/tram
       return { icon: Zap, color: 'text-orange-600', label: 'Lokaltåg/Spårvagn' };
-    case 5: // bus (buss)
+    case 5: // bus
       return { icon: Bus, color: 'text-blue-600', label: 'Buss' };
-    case 9: // ship and ferry (båttrafik)
+    case 9: // ship and ferry
       return { icon: Ship, color: 'text-cyan-600', label: 'Färja' };
-    case 10: // transit on demand area service (anropsstyrd områdestrafik)
+    case 10: // transit on demand area service
       return { icon: Car, color: 'text-yellow-600', label: 'Anropsstyrd trafik' };
     case 14: // long distance/express train
       return { icon: Train, color: 'text-red-600', label: 'Express tåg' };
@@ -30,7 +30,7 @@ const getTransportModeInfoFromProductClass = (productClass: number) => {
   }
 };
 
-// Fallback mappning baserat på typ (för bakåtkompatibilitet)
+// Fallback mapping based on type (for backward compatibility)
 const getTransportModeInfoFromType = (type: string) => {
   const typeLower = type.toLowerCase();
   
@@ -57,16 +57,16 @@ const getTransportModeInfoFromType = (type: string) => {
   return { icon: MapPin, color: 'text-gray-600', label: 'Hållplats' };
 };
 
-// Hämta alla trafikslag för en station baserat på productClasses
+// Get all transport modes for a station based on productClasses
 const getStationTransportModes = (station: any) => {
   const productClasses = new Set<number>();
   
-  // Lägg till huvudstationens productClasses
+  // Add main station's productClasses
   if (station.productClasses && station.productClasses.length > 0) {
     station.productClasses.forEach((pc: number) => productClasses.add(pc));
   }
   
-  // Lägg till parent stationens productClasses om den finns
+  // Add parent station's productClasses if it exists
   if (station.parent?.productClasses && station.parent.productClasses.length > 0) {
     station.parent.productClasses.forEach((pc: number) => productClasses.add(pc));
   }
@@ -74,12 +74,12 @@ const getStationTransportModes = (station: any) => {
   return Array.from(productClasses);
 };
 
-// Skapa ikoner för alla trafikslag
+// Create icons for all transport modes
 const getStationIcons = (station: any) => {
   const productClasses = getStationTransportModes(station);
   
   if (productClasses.length === 0) {
-    // Fallback till typ-baserad gissning
+    // Fallback to type-based guess
     if (station.type) {
       return [getTransportModeInfoFromType(station.type)];
     }
@@ -119,9 +119,9 @@ const getStationTypeSummary = (station: any) => {
   }
 };
 
-// Funktion för att beräkna avstånd mellan två koordinater (Haversine formula)
+// Function to calculate distance between two coordinates (Haversine formula)
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-  const R = 6371e3; // Jordens radie i meter
+  const R = 6371e3; // Earth's radius in meters
   const φ1 = lat1 * Math.PI/180;
   const φ2 = lat2 * Math.PI/180;
   const Δφ = (lat2-lat1) * Math.PI/180;
@@ -154,7 +154,7 @@ const Index = () => {
     setSearchResults([]);
 
     try {
-      // Först försök att hitta hållplatser direkt
+      // First try to find stops directly
       const response = await fetch(`${JOURNEY_PLANNER_V2_URL}/stop-finder?name_sf=${encodeURIComponent(searchQuery)}&any_obj_filter_sf=46&type_sf=any`);
       
       if (!response.ok) {
@@ -164,14 +164,14 @@ const Index = () => {
       const data = await response.json();
       
       if (data.locations && data.locations.length > 0) {
-        // Om vi hittade hållplatser direkt, visa dem
+        // If we found stops directly, show them
         setSearchResults(data.locations.slice(0, 5));
         toast.success(`Hittade ${data.locations.length} hållplatser`);
       } else {
-        // Om inga hållplatser hittades direkt, försök geokoda adressen
+        // If no stops found directly, try to geocode the address
         setLoadingMessage("Inga hållplatser hittades direkt. Geokodar adress...");
         
-        // Använd Nominatim för geokodning (OpenStreetMap) med Stockholm som prioritet
+        // Use Nominatim for geocoding (OpenStreetMap) with Stockholm as priority
         let geocodeResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery + " Stockholm")}&countrycodes=se&limit=1`);
         
         if (!geocodeResponse.ok) {
@@ -180,7 +180,7 @@ const Index = () => {
         
         let geocodeData = await geocodeResponse.json();
         
-        // Om ingen resultat med Stockholm, försök utan
+        // If no result with Stockholm, try without
         if (!geocodeData || geocodeData.length === 0) {
           geocodeResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=se&limit=1`);
           
@@ -192,7 +192,7 @@ const Index = () => {
         }
         
         if (!geocodeData || geocodeData.length === 0) {
-          // Om geokodningen misslyckas, försök med textbaserad sökning som sista utväg
+          // If geocoding fails, try text-based search as last resort
           setLoadingMessage("Försöker hitta hållplatser med textbaserad sökning...");
           
           const textSearchResponse = await fetch(`${JOURNEY_PLANNER_V2_URL}/stop-finder?name_sf=${encodeURIComponent(searchQuery)}&any_obj_filter_sf=2&type_sf=any`);
@@ -206,7 +206,7 @@ const Index = () => {
             }
           }
           
-          // Ge förslag på alternativa söktermer baserat på område
+          // Provide suggestions for alternative search terms based on area
           const suggestions = [
             "Slussen", "Centralen", "T-Centralen", "Gamla Stan", "Östermalmstorg"
           ];
@@ -218,17 +218,17 @@ const Index = () => {
         const { lat, lon } = geocodeData[0];
         setLoadingMessage("Hämtar närliggande hållplatser...");
         
-        // Hitta närliggande hållplatser med större radie för specifika adresser
+        // Find nearby stops with larger radius for specific addresses
         let nearbyStops = await getNearbyStops(parseFloat(lat), parseFloat(lon), 2000);
         
-        // Om inga hållplatser hittades med koordinater, försök med textbaserad sökning
+        // If no stops found with coordinates, try text-based search
         if (nearbyStops.length === 0) {
           setLoadingMessage("Söker efter hållplatser i området...");
           
-          // Extrahera gatunamn från adressen för att söka efter hållplatser
-          const streetName = searchQuery.split(' ')[0]; // Ta första ordet som gatunamn
+          // Extract street name from address to search for stops
+          const streetName = searchQuery.split(' ')[0]; // Take first word as street name
           
-          // Försök först med gatunamn
+          // Try first with street name
           let textSearchResponse = await fetch(`${JOURNEY_PLANNER_V2_URL}/stop-finder?name_sf=${encodeURIComponent(streetName)}&any_obj_filter_sf=2&type_sf=any`);
           
           if (textSearchResponse.ok) {
@@ -238,7 +238,7 @@ const Index = () => {
             }
           }
           
-          // Om fortfarande inga hållplatser, försök med hela söktermen
+          // If still no stops, try with full search term
           if (nearbyStops.length === 0) {
             textSearchResponse = await fetch(`${JOURNEY_PLANNER_V2_URL}/stop-finder?name_sf=${encodeURIComponent(searchQuery)}&any_obj_filter_sf=2&type_sf=any`);
             
@@ -252,7 +252,7 @@ const Index = () => {
         }
         
         if (nearbyStops.length === 0) {
-          // Ge förslag på alternativa söktermer baserat på område
+          // Provide suggestions for alternative search terms based on area
           const suggestions = [
             "Slussen", "Centralen", "T-Centralen", "Gamla Stan", "Östermalmstorg"
           ];
@@ -284,7 +284,7 @@ const Index = () => {
     setError(null);
     setTrips([]);
 
-    // Kontrollera om geolocation finns
+    // Check if geolocation is available
     if (!navigator.geolocation) {
       setError("Din webbläsare stöder inte positionering.");
       return;
@@ -294,7 +294,7 @@ const Index = () => {
     setLoadingMessage("Hämtar position...");
 
     try {
-      // Hämta användarens position
+      // Get user's position
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
@@ -306,11 +306,11 @@ const Index = () => {
       const { latitude, longitude } = position.coords;
       setUserCoords({ lat: latitude, lon: longitude });
 
-      // Hämta destination SiteId
+      // Get destination SiteId
       setLoadingMessage("Hämtar hållplatsinformation...");
       const siteId = await getSiteId(destination);
 
-      // Hämta resor
+      // Get trips
       setLoadingMessage("Hämtar resor...");
       const fetchedTrips = await getTripsFromCoordsToDest(
         latitude,
