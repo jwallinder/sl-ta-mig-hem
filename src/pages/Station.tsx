@@ -16,6 +16,7 @@ const Station = () => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [userCoords, setUserCoords] = useState<{lat: number, lon: number} | null>(null);
+  const [originName, setOriginName] = useState<string | null>(null);
 
   const decodedStationName = stationName ? decodeURIComponent(stationName) : "";
   const [hasAutoSearched, setHasAutoSearched] = useState(false);
@@ -25,6 +26,7 @@ const Station = () => {
 
     setError(null);
     setTrips([]);
+    setOriginName(null);
 
     // Kontrollera om geolocation finns
     if (!navigator.geolocation) {
@@ -62,6 +64,12 @@ const Station = () => {
 
       setTrips(fetchedTrips);
       if (fetchedTrips.length > 0) {
+        // Hämta platsnamnet från första resans första ben
+        const firstTrip = fetchedTrips[0];
+        if (firstTrip.legs && firstTrip.legs.length > 0) {
+          const originName = firstTrip.legs[0].origin.disassembledName;
+          setOriginName(originName);
+        }
         toast.success(`Hittade ${fetchedTrips.length} reseförslag till ${decodedStationName}!`);
       }
     } catch (err: unknown) {
@@ -147,7 +155,10 @@ const Station = () => {
             {decodedStationName}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Söker efter reseförslag från din plats...
+            {originName 
+              ? `Söker efter reseförslag från ${originName}.`
+              : "Söker efter reseförslag från din plats."
+            }
           </p>
         </div>
       </header>
