@@ -165,7 +165,7 @@ const Station = () => {
               disabled={loading}
             >
               <MapPin className="w-6 h-6 mr-3" />
-              {loading ? 'Söker reseförslag...' : 'Uppdatera reseförslag till ' + decodedStationName}
+              {loading ? 'Söker reseförslag...' : 'Uppdatera'}
             </Button>
           </div>
 
