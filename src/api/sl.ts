@@ -10,8 +10,15 @@ export { JOURNEY_PLANNER_V2_URL };
 // Cache for stops
 const siteIdCache: { [key: string]: string } = {};
 
-export interface StopFinderResponse {
-  locations: Array<{
+export interface Location {
+  isGlobalId: boolean;
+  id: string;
+  name: string;
+  disassembledName: string;
+  type: string;
+  coord: number[];
+  niveau: number;
+  parent?: {
     isGlobalId: boolean;
     id: string;
     name: string;
@@ -19,16 +26,13 @@ export interface StopFinderResponse {
     type: string;
     coord: number[];
     niveau: number;
-    parent?: {
-      isGlobalId: boolean;
-      id: string;
-      name: string;
-      disassembledName: string;
-      type: string;
-      coord: number[];
-      niveau: number;
-    };
-  }>;
+  };
+}
+
+type Locations = Location[];
+
+export interface StopFinderResponse {
+  locations: Locations;
 }
 
 export interface Trip {
@@ -129,7 +133,7 @@ export async function getNearbyStops(
   lat: number,
   lon: number,
   radius: number = 1000
-): Promise<StopFinderResponse['locations']> {
+): Promise<Locations> {
   try {
     const params = new URLSearchParams({
       type_sf: "coord",
