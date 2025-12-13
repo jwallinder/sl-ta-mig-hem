@@ -4,26 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin, Train, Bus, Navigation, Zap, Ship, Car } from "lucide-react";
 import { toast } from "sonner";
-import { JOURNEY_PLANNER_V2_URL } from "@/api/sl";
-
-interface Station {
-  id: string;
-  name: string;
-  disassembledName: string;
-  coord: number[];
-  type: string;
-  productClasses?: number[];
-  parent?: {
-    isGlobalId: boolean;
-    id: string;
-    name: string;
-    disassembledName: string;
-    type: string;
-    coord: number[];
-    niveau: number;
-    productClasses?: number[];
-  };
-}
+import { JOURNEY_PLANNER_V2_URL, Location, StopFinderResponse } from "@/api/sl";
 
 // Mapping of SL API productClasses to icons and colors
 const getTransportModeInfoFromProductClass = (productClass: number) => {
@@ -75,7 +56,7 @@ const getTransportModeInfoFromType = (type: string) => {
 };
 
 // Get all transport modes for a station based on productClasses
-const getStationTransportModes = (station: Station) => {
+const getStationTransportModes = (station: Location) => {
   const productClasses = new Set<number>();
   
   // Add main station's productClasses
@@ -92,7 +73,7 @@ const getStationTransportModes = (station: Station) => {
 };
 
 // Create icons for all transport modes
-const getStationIcons = (station: Station) => {
+const getStationIcons = (station: Location) => {
   const productClasses = getStationTransportModes(station);
   
   if (productClasses.length === 0) {
@@ -113,7 +94,7 @@ const getStationIcons = (station: Station) => {
 };
 
 // Create a summary of transport modes
-const getStationTypeSummary = (station: Station) => {
+const getStationTypeSummary = (station: Location) => {
   const productClasses = getStationTransportModes(station);
   
   if (productClasses.length === 0) {
@@ -138,7 +119,7 @@ const getStationTypeSummary = (station: Station) => {
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Station[]>([]);
+  const [searchResults, setSearchResults] = useState<Location[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const navigate = useNavigate();
@@ -167,10 +148,10 @@ const Home = () => {
         throw new Error(`Sökfel: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data: StopFinderResponse = await response.json();
       
       if (data.locations && data.locations.length > 0) {
-        setSearchResults(data.locations.slice(0, 8)); // Visa max 8 resultat
+        setSearchResults(data.locations.slice(0, 8)); // Show max 8 results
         setShowResults(true);
       } else {
         setSearchResults([]);
@@ -185,7 +166,7 @@ const Home = () => {
     }
   };
 
-  const handleStationSelect = (station: Station) => {
+  const handleStationSelect = (station: Location) => {
     setSearchQuery(station.name);
     setShowResults(false);
     navigate(`/station/${encodeURIComponent(station.name)}`);

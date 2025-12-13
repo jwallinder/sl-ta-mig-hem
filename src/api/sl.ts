@@ -18,6 +18,7 @@ export interface Location {
   type: string;
   coord: number[];
   niveau: number;
+  productClasses?: number[];
   parent?: {
     isGlobalId: boolean;
     id: string;
@@ -26,10 +27,11 @@ export interface Location {
     type: string;
     coord: number[];
     niveau: number;
+    productClasses?: number[];
   };
 }
 
-type Locations = Location[];
+export type Locations = Location[];
 
 export interface StopFinderResponse {
   locations: Locations;

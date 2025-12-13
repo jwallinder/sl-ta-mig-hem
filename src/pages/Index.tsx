@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getSiteId, getTripsFromCoordsToDest, getNearbyStops, Trip, JOURNEY_PLANNER_V2_URL } from "@/api/sl";
+import { getSiteId, getTripsFromCoordsToDest, getNearbyStops, Trip, Location, Locations, JOURNEY_PLANNER_V2_URL } from "@/api/sl";
 import TripCard from "@/components/TripCard";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorMessage from "@/components/ErrorMessage";
@@ -58,7 +58,7 @@ const getTransportModeInfoFromType = (type: string) => {
 };
 
 // Get all transport modes for a station based on productClasses
-const getStationTransportModes = (station: any) => {
+const getStationTransportModes = (station: Location) => {
   const productClasses = new Set<number>();
   
   // Add main station's productClasses
@@ -75,7 +75,7 @@ const getStationTransportModes = (station: any) => {
 };
 
 // Create icons for all transport modes
-const getStationIcons = (station: any) => {
+const getStationIcons = (station: Location) => {
   const productClasses = getStationTransportModes(station);
   
   if (productClasses.length === 0) {
@@ -95,8 +95,8 @@ const getStationIcons = (station: any) => {
   return productClasses.map(pc => getTransportModeInfoFromProductClass(pc));
 };
 
-// Skapa en sammanfattning av trafikslag
-const getStationTypeSummary = (station: any) => {
+// Create a summary of transport modes
+const getStationTypeSummary = (station: Location) => {
   const productClasses = getStationTransportModes(station);
   
   if (productClasses.length === 0) {
@@ -141,7 +141,7 @@ const Index = () => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Locations>([]);
   const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
   const [userCoords, setUserCoords] = useState<{lat: number, lon: number} | null>(null);
 
@@ -273,7 +273,7 @@ const Index = () => {
     }
   };
 
-  const handleSelectDestination = (location: any) => {
+  const handleSelectDestination = (location: Location) => {
     setSelectedDestination(location.name);
     setSearchResults([]);
     setSearchQuery("");
