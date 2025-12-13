@@ -129,7 +129,7 @@ export async function getNearbyStops(
   lat: number,
   lon: number,
   radius: number = 1000
-): Promise<any[]> {
+): Promise<StopFinderResponse['locations']> {
   try {
     const params = new URLSearchParams({
       type_sf: "coord",
