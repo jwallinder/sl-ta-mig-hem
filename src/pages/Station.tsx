@@ -239,6 +239,13 @@ const Station = () => {
         </a>
         <span className="text-sm text-muted-foreground">•</span>
         <a
+          href="/contact"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
+        >
+          Kontakta oss
+        </a>
+        <span className="text-sm text-muted-foreground">•</span>
+        <a
           href="/privacy"
           className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
         >

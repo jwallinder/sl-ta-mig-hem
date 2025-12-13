@@ -6,6 +6,10 @@
       "destination": "https://journeyplanner.integration.sl.se/v2/$1"
     },
     {
+      "source": "/api/contact",
+      "destination": "/api/contact"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
