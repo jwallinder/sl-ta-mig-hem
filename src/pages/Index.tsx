@@ -539,7 +539,7 @@ const Index = () => {
       </main>
 
       {/* Footer */}
-      <footer className="w-full py-4 px-4 border-t border-border text-center space-x-4">
+      <footer className="sticky bottom-0 w-full py-4 px-4 border-t border-border bg-background text-center space-x-4">
         <a
           href="/about"
           className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
